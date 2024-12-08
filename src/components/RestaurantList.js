@@ -3,28 +3,38 @@ import StarRating from './StarRating';
 import ShareButtons from './ShareButtons';
 
 
-const RestaurantList = ({ restaurants, onEdit, onRemove }) => {
+const RestaurantList = ({ restaurants, onEdit, onDelete }) => {
+    if (!onDelete) {
+        console.warn('onDelete is not provided');
+    }
     return (
         <div>
             <h2>Restaurant List</h2>
-            {restaurants.map((restaurant, index) => (
-                <div key={index} style={{ marginBottom: '20px' }}>
-                    <h3>{restaurant.name}</h3>
-                    <p>{restaurant.address}</p>
-                    <p>{restaurant.phones.join(', ')}</p>
-                    <p>{restaurant.description}</p>
-                    <p><strong>Tags:</strong> {restaurant.tags.join(', ')}</p>
-                    <p>
-                        <strong>Rating:</strong>
-                        <StarRating rating={restaurant.rating} onRatingChange={() => { }} /> {/* Display rating */}
-                    </p>
+            {restaurants.length === 0 ? (
+                <p>No restaurants available.</p>
+            ) : (
+                <ul>
+                    {restaurants.map((restaurant) => (
+                        <li key={restaurant.id}>
+                            <strong>{restaurant.name}</strong> - {restaurant.address} - {restaurant.rating} stars
+                            <p>{restaurant.description}</p>
+                            <p>Tags: {restaurant.tags.join(', ')}</p>
+                            <p>Phones: {restaurant.phones.join(', ')}</p>
+                            <p>
+                                <strong>Rating:</strong>
+                                <StarRating rating={restaurant.rating} onRatingChange={() => { }} /> {/* Display rating */}
+                            </p>
 
-                    <button onClick={() => onEdit(index, restaurant)}>Edit</button>
-                    <button onClick={() => onRemove(index)}>Remove</button>
-                    {/* Include Share Buttons */}
-                    <ShareButtons restaurant={restaurant} />
-                </div>
-            ))}
+
+                            <button onClick={() => onEdit(restaurant)}>Edit</button>
+                            <button onClick={() => onDelete(restaurant.id)}>Delete</button>
+                            {/* Include Share Buttons */}
+                            <ShareButtons restaurant={restaurant} />
+
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 };

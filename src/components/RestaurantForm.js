@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StarRating from './StarRating'; // Import the StarRating component
 
 
@@ -10,6 +10,18 @@ const RestaurantForm = ({ onSubmit, restaurant = null }) => {
     const [tags, setTags] = useState(restaurant ? restaurant.tags : []);
     const [rating, setRating] = useState(restaurant ? restaurant.rating : 0); // Add rating state
 
+    useEffect(() => {
+        if (restaurant) {
+            // Populate form with restaurant data when editing
+            setName(restaurant.name);
+            setAddress(restaurant.address);
+            setPhones(restaurant.phones || []);
+            setDescription(restaurant.description);
+            setTags(restaurant.tags || []);
+            setRating(restaurant.rating || 0);
+        }
+    }, [restaurant]);
+
     const handleTagChange = (e) => {
         const inputTags = e.target.value.split(',').map(tag => tag.trim());
         setTags(inputTags);
@@ -17,8 +29,18 @@ const RestaurantForm = ({ onSubmit, restaurant = null }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const newRestaurant = { name, address, phones, description, tags, rating };
-        onSubmit(newRestaurant);
+        const updatedRestaurant = { name, address, phones, description, tags, rating };
+        onSubmit(updatedRestaurant);
+
+        // Reset the form only when adding a new restaurant
+        if (!restaurant) {
+            setName('');
+            setAddress('');
+            setPhones([]);
+            setDescription('');
+            setTags([]);
+            setRating(0);
+        }
     };
 
     return (
@@ -62,8 +84,9 @@ const RestaurantForm = ({ onSubmit, restaurant = null }) => {
                     placeholder="e.g., vegetarian, vegan, Italian"
                 />
             </div>
-            <button type="submit">Save Restaurant</button>
+            <button type="submit">{restaurant ? 'Save Changes' : 'Save Restaurant'}</button>
         </form>
+
     );
 };
 

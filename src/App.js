@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import RestaurantForm from "./components/RestaurantForm"; // Import the form component
 import RestaurantList from "./components/RestaurantList"; // Import the list component
-
-import "./App.css"; // Assuming you have some basic styles
+import "./App.css";
 import logo from './logo.png';
+
+
 
 
 
@@ -23,22 +24,27 @@ const App = () => {
         return () => clearTimeout(timer); // Clean up the timer on component unmount
     }, []);
 
-    // Handle form submission for adding or updating a restaurant
-    const handleAddOrUpdate = (restaurant) => {
-        if (restaurant.id) {
-            // Edit mode
-            setRestaurants((prev) =>
-                prev.map((r) => (r.id === restaurant.id ? restaurant : r))
+    const handleFormSubmit = (updatedRestaurant) => {
+        if (editingRestaurant) {
+            // Update an existing restaurant
+            setRestaurants((prevRestaurants) =>
+                prevRestaurants.map((restaurant) =>
+                    restaurant.name === editingRestaurant.name
+                        ? { ...restaurant, ...updatedRestaurant }
+                        : restaurant
+                )
             );
         } else {
-            // Add mode
-            setRestaurants((prev) => [
-                ...prev,
-                { id: Date.now(), ...restaurant }, // Generate unique ID for the new restaurant
-            ]);
+            // Add a new restaurant
+            setRestaurants([...restaurants, { ...updatedRestaurant, id: Date.now() }]);
         }
-        setEditingRestaurant(null); // Reset editing state
+        setEditingRestaurant(null); // Exit edit mode after submission
     };
+
+    const handleEditClick = (restaurant) => {
+        setEditingRestaurant(restaurant);
+    };
+
 
 
     // Toggle About screen visibility
@@ -46,16 +52,17 @@ const App = () => {
         setShowAbout((prev) => !prev); // Toggle About screen visibility
     };
 
-    const editRestaurant = (index, updatedRestaurant) => {
-        const newRestaurants = [...restaurants];
-        newRestaurants[index] = updatedRestaurant;
-        setRestaurants(newRestaurants);
+
+
+
+    const handleDelete = (restaurantId) => {
+        console.log('Deleting restaurant with id:', restaurantId);
+        setRestaurants((prevRestaurants) =>
+            prevRestaurants.filter((restaurant) => restaurant.id !== restaurantId)
+        );
     };
 
-    const removeRestaurant = (index) => {
-        const newRestaurants = restaurants.filter((_, i) => i !== index);
-        setRestaurants(newRestaurants);
-    };
+
 
     return (
         <div>
@@ -82,19 +89,19 @@ const App = () => {
                             <h1>Restaurant Manager</h1>
 
                             {/* RestaurantForm for adding or editing a restaurant */}
-                            <RestaurantForm
-                                onSubmit={handleAddOrUpdate}
-                                initialData={editingRestaurant || {}} // If no restaurant is selected, pass an empty object
-                                onCancel={() => setEditingRestaurant(null)} // Cancel editing
-                            />
+                                <RestaurantForm
+                                    onSubmit={handleFormSubmit}
+                                    restaurant={editingRestaurant}
+                                />
 
 
                             <h2>Saved Restaurants</h2>
                             <RestaurantList
                                 restaurants={restaurants}
-                                onEdit={editRestaurant}
-                                onRemove={removeRestaurant}
-                            />
+                                onEdit={handleEditClick}
+                                onDelete={handleDelete}
+                                    />
+
 
                             <button onClick={handleShowAbout} style={{ marginTop: "20px" }}>
                                 About
